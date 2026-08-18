@@ -7,7 +7,9 @@ name: ooo
 
 services:
   ooo:
-    build: .
+    build:
+      context: .
+      network: host
     ports:
       # Loopback by default: this speaks plain HTTP with no TLS of its own, so
       # it wants a proxy or a tunnel in front. Set BIND_ADDR=0.0.0.0 in .env
