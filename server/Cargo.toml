@@ -1,0 +1,30 @@
+[package]
+name = "ooo-server"
+version = "1.0.0"
+edition = "2021"
+description = "The ultimate url lengthner - redirect server"
+publish = false
+
+[lib]
+name = "ooo"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ooo-server"
+path = "src/main.rs"
+
+[dependencies]
+hyper = { version = "1", default-features = false, features = ["http1", "server"] }
+hyper-util = { version = "0.1", default-features = false, features = ["tokio"] }
+http-body-util = "0.1"
+tokio = { version = "1", default-features = false, features = ["rt-multi-thread", "net", "macros", "signal", "sync", "time"] }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true
+# Unwinding, not abort: a panic is isolated to the one connection whose task
+# raised it instead of taking the process down. There is no shared mutable
+# state between connections, so there is nothing for a surviving task to have
+# corrupted.

@@ -1,0 +1,42 @@
+# Everything that changes from deploy to deploy goes through variables, so this
+# file never needs editing and `git pull` stays clean. The values live in `.env`
+# (untracked): `cp .env.example .env` and edit that.
+# The directory is `server/`, so without this the project, network and
+# container would all be named after that instead of the thing they run.
+name: ooo
+
+services:
+  ooo:
+    build: .
+    ports:
+      # Loopback by default: this speaks plain HTTP with no TLS of its own, so
+      # it wants a proxy or a tunnel in front. Set BIND_ADDR=0.0.0.0 in .env
+      # only if you mean to serve the internet directly.
+      - "${BIND_ADDR:-127.0.0.1}:${HOST_PORT:-8888}:8888"
+    environment:
+      # Ceiling on descriptors and on memory: worst case is this times the
+      # 128 KB per-connection read buffer, so 512 tops out around 64 MB. At
+      # sub-millisecond service times one slot carries thousands of requests
+      # per second, so this is about absorbing concurrent connections, not
+      # concurrent work.
+      OOO_MAX_CONNECTIONS: ${OOO_MAX_CONNECTIONS:-512}
+    restart: unless-stopped
+
+    # No state, no writes, nothing to persist: the decoding is arithmetic.
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    # Real traffic sits near 4 MB; 512 connections all sending oversized request
+    # heads is the ~64 MB worst case. If the container gets killed here, that's
+    # a signal, not a tuning problem.
+    mem_limit: ${MEM_LIMIT:-96m}
+    pids_limit: 64
+    ulimits:
+      # Has to stay above OOO_MAX_CONNECTIONS with room for the listener.
+      nofile: ${NOFILE:-4096}
+
+    # No healthcheck: `scratch` has no shell and no curl, so there is nothing in
+    # the image to run one with. The `/up` endpoint answers 204 for a prober
+    # that lives outside the container - a load balancer, a Kubernetes httpGet
+    # probe, an uptime monitor.

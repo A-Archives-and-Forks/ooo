@@ -1,3 +1,5 @@
+import { OOO } from "./ooo.js";
+
 const input = document.getElementById("input-url");
 const output = document.getElementById("output-url");
 const oooBtn = document.getElementById("ooo-button");
@@ -5,6 +7,8 @@ const copyBtn = document.getElementById("copy-button");
 
 // init
 input.addEventListener("keydown", e => e.code == "Enter" ? oooify() : null)
+oooBtn.addEventListener("click", oooify)
+copyBtn.addEventListener("click", copy)
 
 // mouse enter listener
 
@@ -51,7 +55,7 @@ function oooify() {
                 input.value = oldValue
                 input.disabled = false
                 input.focus()
-                inBlinking = false
+                window.inBlinking = false
             }
         }, 150)
         return

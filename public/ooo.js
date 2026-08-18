@@ -1,4 +1,4 @@
-class OOO {
+export class OOO {
     enc = ["o", "ο", "о", "ᴏ"]
     //           006f 03bf 043e 1d0f
     dec = {

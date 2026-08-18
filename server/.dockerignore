@@ -1,0 +1,9 @@
+target
+tests
+.env
+.env.example
+compose.yml
+Dockerfile
+README.md
+.dockerignore
+.gitignore
